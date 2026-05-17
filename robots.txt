@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://regexr-lite.surge.sh/sitemap.xml
