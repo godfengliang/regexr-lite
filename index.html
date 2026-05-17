@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RegExr Lite — Live Regex Tester & Debugger</title>
+<meta name="description" content="Test regex patterns instantly. Live match highlighting, capture groups, common patterns library. Free, works offline.">
+<meta name="keywords" content="regex tester, regular expression, regex debugger, regex online, pattern matching">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://regexr-lite.surge.sh/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="RegExr Lite — Live Regex Tester">
+<meta property="og:description" content="Test regex patterns with live highlighting, capture groups, and common patterns. Free, works offline.">
+<meta property="og:url" content="https://regexr-lite.surge.sh/">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"RegExr Lite","applicationCategory":"DeveloperApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Live regex tester with match highlighting and capture groups."}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;display:flex;flex-direction:column}
+header{padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #21262d;background:#161b22}
+header h1{font-size:18px;font-weight:800}header h1 span{color:#f0883e}
+.regex-input{padding:12px 20px;background:#161b22;border-bottom:1px solid #21262d;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.regex-input input{flex:1;min-width:200px;background:#0d1117;border:2px solid #30363d;color:#e6edf3;padding:10px 12px;border-radius:8px;font-family:'SF Mono',Consolas,monospace;font-size:14px;outline:none}
+.regex-input input:focus{border-color:#f0883e}
+.flags{display:flex;gap:4px}
+.flag{padding:6px 12px;border-radius:6px;border:1px solid #30363d;background:#21262d;color:#8b949e;font-size:12px;font-weight:700;cursor:pointer;font-family:'SF Mono',Consolas,monospace}
+.flag.active{background:#f0883e;border-color:#f0883e;color:#fff}
+.main{flex:1;display:flex;overflow:hidden}
+.pane{flex:1;display:flex;flex-direction:column}
+.pane:first-child{border-right:1px solid #21262d}
+.pane-header{padding:6px 14px;font-size:11px;color:#8b949e;background:#161b22;border-bottom:1px solid #21262d;font-weight:600;text-transform:uppercase;letter-spacing:.5px;display:flex;justify-content:space-between}
+textarea{flex:1;background:#0d1117;color:#c9d1d9;border:none;padding:14px;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.7;resize:none;outline:none;tab-size:2}
+textarea::placeholder{color:#484f58}
+.matches{flex:1;overflow-y:auto;padding:14px;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.7}
+.match{position:relative;display:inline}
+.match .hl{background:#f0883e33;border-radius:2px;color:#f0883e;font-weight:600}
+.match .grp{background:#3fb95033;color:#3fb950;border-radius:2px}
+.no-match{color:#8b949e;font-style:italic}
+.results{background:#161b22;border-top:1px solid #21262d;padding:10px 14px;max-height:180px;overflow-y:auto}
+.result-header{font-size:11px;color:#8b949e;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.match-entry{display:flex;gap:8px;padding:4px 0;font-size:12px;border-bottom:1px solid #21262d;align-items:flex-start}
+.match-entry:last-child{border:none}
+.match-num{color:#f0883e;font-weight:700;min-width:24px}
+.match-val{color:#e6edf3;font-family:'SF Mono',Consolas,monospace;word-break:break-all}
+.group{color:#3fb950;margin-left:8px;font-size:11px}
+.presets{padding:8px 20px;background:#161b22;border-bottom:1px solid #21262d;display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.presets label{font-size:11px;color:#8b949e;margin-right:4px}
+.preset{padding:3px 10px;border-radius:4px;background:#21262d;border:1px solid #30363d;color:#c9d1d9;font-size:11px;cursor:pointer}
+.preset:hover{background:#30363d}
+.err{color:#f85149;font-size:12px;padding:2px 0}
+.copy-btn{padding:4px 10px;border-radius:4px;background:#21262d;border:1px solid #30363d;color:#8b949e;font-size:11px;cursor:pointer}
+.copy-btn:hover{background:#30363d;color:#c9d1d9}
+@media(max-width:700px){.main{flex-direction:column}.pane:first-child{border-right:none;border-bottom:1px solid #21262d}textarea{min-height:120px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>RegExr <span>Lite</span></h1>
+</header>
+<div class="regex-input">
+  <input type="text" id="pattern" placeholder="Enter regex pattern..." spellcheck="false" value="(\w+)@(\w+)\.(\w+)">
+  <div class="flags">
+    <button class="flag active" data-flag="g" title="Global">g</button>
+    <button class="flag" data-flag="i" title="Case insensitive">i</button>
+    <button class="flag" data-flag="m" title="Multiline">m</button>
+    <button class="flag" data-flag="s" title="Dot matches newline">s</button>
+  </div>
+</div>
+<div class="presets">
+  <label>Patterns:</label>
+  <button class="preset" data-p="email">Email</button>
+  <button class="preset" data-p="url">URL</button>
+  <button class="preset" data-p="ip">IPv4</button>
+  <button class="preset" data-p="phone">Phone</button>
+  <button class="preset" data-p="date">Date</button>
+  <button class="preset" data-p="hex">Hex Color</button>
+  <button class="preset" data-p="number">Number</button>
+  <button class="preset" data-p="tag">HTML Tag</button>
+  <button class="preset" data-p="password">Password</button>
+  <button class="preset" data-p="slug">Slug</button>
+</div>
+<div class="main">
+  <div class="pane">
+    <div class="pane-header"><span>Test String</span><span id="charCount">0 chars</span></div>
+    <textarea id="testStr" placeholder="Enter test string here...
+Match results appear in real-time on the right." spellcheck="false">user@example.com
+admin@test.org
+hello world
+foo@bar.net
+not an email
+john.doe+tag@company.co.uk</textarea>
+  </div>
+  <div class="pane">
+    <div class="pane-header"><span>Match Result</span><span id="matchCount">0 matches</span></div>
+    <div class="matches" id="matchOutput"></div>
+    <div class="results" id="results">
+      <div class="result-header">Matches & Groups</div>
+      <div id="matchList"></div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+
+const PRESETS={
+  email:{pattern:'[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}',flags:'gi',test:'user@example.com\nadmin@test.org\nhello world\nfoo@bar.net\njohn.doe+tag@company.co.uk'},
+  url:{pattern:'https?://[\\w\\-]+(\\.[\\w\\-]+)+[\\w.,@?^=%&:/~+#\\-]*',flags:'gi',test:'Visit https://example.com for info\nhttp://test.org/page?q=1\nftp://not-match.com\nhttps://a.b.c/path/to/file.html'},
+  ip:{pattern:'\\b(?:(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\b',flags:'g',test:'192.168.1.1\n10.0.0.255\ninvalid 999.999.999.999\n127.0.0.1\n8.8.8.8'},
+  phone:{pattern:'(\\+?\\d{1,3}[-.\\s]?)?\\(?\\d{3}\\)?[-.\\s]?\\d{3}[-.\\s]?\\d{4}',flags:'g',test:'555-123-4567\n(555) 123-4567\n+1 555.123.4567\n1234567\nnot a phone'},
+  date:{pattern:'\\d{4}[-/]\\d{2}[-/]\\d{2}',flags:'g',test:'2024-01-15\n2023/12/31\n99/99/99\n2024-13-01\n2024-02-29'},
+  hex:{pattern:'#(?:[0-9a-fA-F]{3}){1,2}\\b',flags:'gi',test:'color: #ff0000;\nbackground: #00ff00;\nborder: #abcdef;\n#fff\n#000\nnot a color: #xyz'},
+  number:{pattern:'-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?',flags:'g',test:'The answer is 42\npi = 3.14159\n-17\n1e10\n2.5e-3\nnot a number'},
+  tag:{pattern:'<([a-zA-Z][a-zA-Z0-9]*)\\b[^>]*>(.*?)</\\1>',flags:'g',test:'<div class="main">Hello</div>\n<p>World</p>\n<span>Test</span>\n<br>\n<a href="#">Link</a>'},
+  password:{pattern:'(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*]).{8,}',flags:'g',test:'Abc123!@\npassword\nPASSWORD123\nP@ssw0rd\nshort1!\nMyP@ss2024'},
+  slug:{pattern:'[a-z0-9]+(?:-[a-z0-9]+)*',flags:'g',test:'my-blog-post\nhello-world\nNOT-A-SLUG\nthis-is-a-slug\ncamelCase\nfoo-bar-baz'},
+};
+
+let flags=new Set(['g']);
+
+function getFlags(){return Array.from(flags).sort().join('');}
+
+function test(){
+  const pattern=$('pattern').value;
+  const str=$('testStr').value;
+  $('charCount').textContent=str.length+' chars';
+
+  if(!pattern){
+    $('matchOutput').innerHTML='<div class="no-match">Enter a regex pattern to start matching</div>';
+    $('matchList').innerHTML='';$('matchCount').textContent='0 matches';return;
+  }
+
+  let regex;
+  try{regex=new RegExp(pattern,getFlags());}
+  catch(e){
+    $('matchOutput').innerHTML=`<div class="err">Invalid regex: ${e.message}</div>`;
+    $('matchList').innerHTML='';$('matchCount').textContent='Error';return;
+  }
+
+  // Highlight matches
+  const matches=[];
+  let match;
+  if(flags.has('g')){
+    while((match=regex.exec(str))!==null){
+      matches.push({index:match.index,end:match.index+match[0].length,full:match[0],groups:Array.from(match).slice(1)});
+      if(match[0].length===0)regex.lastIndex++;
+    }
+  }else{
+    match=regex.exec(str);
+    if(match)matches.push({index:match.index,end:match.index+match[0].length,full:match[0],groups:Array.from(match).slice(1)});
+  }
+
+  // Build highlighted output
+  let html='';
+  let last=0;
+  matches.forEach((m,i)=>{
+    html+=esc(str.slice(last,m.index));
+    html+=`<span class="match"><span class="hl" title="Match ${i+1}">${esc(m.full)}</span></span>`;
+    last=m.end;
+  });
+  html+=esc(str.slice(last));
+  $('matchOutput').innerHTML=html.replace(/\n/g,'<br>');
+
+  // Match list
+  $('matchCount').textContent=matches.length+' match'+(matches.length!==1?'es':'');
+  let listHtml='';
+  matches.forEach((m,i)=>{
+    const groups=m.groups.map((g,gi)=>`<span class="group">$${gi+1}: ${esc(g||'')}</span>`).join('');
+    listHtml+=`<div class="match-entry"><span class="match-num">${i+1}</span><span class="match-val">${esc(m.full)}</span>${groups}</div>`;
+  });
+  $('matchList').innerHTML=listHtml||'<div class="no-match" style="font-size:12px">No matches found</div>';
+}
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+$('pattern').addEventListener('input',test);
+$('testStr').addEventListener('input',test);
+
+document.querySelectorAll('.flag').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const f=btn.dataset.flag;
+    if(flags.has(f)){flags.delete(f);btn.classList.remove('active');}
+    else{flags.add(f);btn.classList.add('active');}
+    test();
+  });
+});
+
+document.querySelectorAll('.preset').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const p=PRESETS[btn.dataset.p];
+    if(!p)return;
+    $('pattern').value=p.pattern;
+    $('testStr').value=p.test;
+    // Set flags
+    flags.clear();
+    p.flags.split('').forEach(f=>{flags.add(f);});
+    document.querySelectorAll('.flag').forEach(b=>{
+      b.classList.toggle('active',flags.has(b.dataset.flag));
+    });
+    test();
+  });
+});
+
+test();
+})();
+</script>
+</body>
+</html>
